@@ -40,31 +40,31 @@
     }
   </style>
 </head>
-<body class="bg-festival text-white h-screen flex flex-col justify-between items-center overflow-hidden p-2 pb-4 gap-2">
+<body class="bg-festival text-white h-screen flex flex-col justify-start items-center overflow-hidden p-1 pb-2 gap-1">
 
   <!-- 音源要素 -->
   <audio id="bgmAudio" preload="auto"></audio>
 
   <!-- ヘッダー -->
-  <header class="w-full h-[42px] shrink-0 flex justify-between items-center border-b-2 border-red-900/60 z-10 px-1 pb-1">
+  <header class="w-full h-[38px] shrink-0 flex justify-between items-center border-b border-red-900/60 z-10 px-1">
     <div class="flex items-center gap-2 min-w-0">
-      <div class="w-7 h-7 rounded-full bg-red-700 flex items-center justify-center border-2 border-amber-400 shadow-md shrink-0">
-        <i class="fa-solid font-bold text-amber-300 text-xs">祭</i>
+      <div class="w-6 h-6 rounded-full bg-red-700 flex items-center justify-center border border-amber-400 shadow-md shrink-0">
+        <i class="fa-solid font-bold text-amber-300 text-[10px]">祭</i>
       </div>
       <div class="min-w-0">
-        <h1 class="text-base font-black text-amber-400 font-japanese leading-none truncate">太鼓練習アプリ</h1>
-        <p id="currentSongTitle" class="text-[10px] text-red-300 font-bold truncate max-w-[140px]">楽曲未選択</p>
+        <h1 class="text-sm font-black text-amber-400 font-japanese leading-none truncate">太鼓練習アプリ</h1>
+        <p id="currentSongTitle" class="text-[9px] text-red-300 font-bold truncate max-w-[130px]">楽曲未選択</p>
       </div>
     </div>
 
     <div class="flex items-center gap-1.5 shrink-0">
-      <button id="resetBtn" class="hidden bg-stone-800 active:bg-stone-900 border border-amber-500/60 text-amber-300 text-[10px] px-2 py-1 rounded-lg font-bold shadow-md">
+      <button id="resetBtn" class="hidden bg-stone-800 active:bg-stone-900 border border-amber-500/60 text-amber-300 text-[10px] px-2 py-0.5 rounded-lg font-bold shadow-md">
         <i class="fa-solid fa-rotate-left mr-1"></i>曲選択へ
       </button>
 
       <div class="flex items-center bg-red-950/90 border border-amber-500/50 rounded-full px-2 py-0.5">
-        <label class="flex items-center cursor-pointer gap-1 text-xs font-black text-amber-200 whitespace-nowrap">
-          <span class="text-amber-300 font-japanese text-xs flex items-center whitespace-nowrap"><i class="fa-solid fa-eye-slash mr-1"></i>暗譜</span>
+        <label class="flex items-center cursor-pointer gap-1 text-[11px] font-black text-amber-200 whitespace-nowrap">
+          <span class="text-amber-300 font-japanese text-[11px] flex items-center whitespace-nowrap"><i class="fa-solid fa-eye-slash mr-1"></i>暗譜</span>
           <input type="checkbox" id="blindToggle" class="sr-only peer">
           <div class="w-7 h-3.5 bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-amber-300 after:border-amber-400 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-red-600 relative shrink-0"></div>
         </label>
@@ -73,8 +73,8 @@
   </header>
 
   <!-- 描画エリア（ゲーム画面） -->
-  <main class="relative shrink-0 w-full flex items-start justify-center min-h-0 overflow-hidden my-0">
-    <div id="gameContainer" class="relative w-full max-h-[48vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center">
+  <main class="relative shrink-0 w-full flex items-start justify-center min-h-0 overflow-hidden mt-0 mb-1">
+    <div id="gameContainer" class="relative w-full max-h-[46vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center">
       
       <!-- スコア表示バー -->
       <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-1 z-20 flex justify-between text-xs text-amber-200 px-3 font-black tracking-wide">
@@ -85,17 +85,18 @@
 
       <canvas id="gameCanvas" width="1280" height="720" class="w-full h-full block z-10 object-contain"></canvas>
 
-      <!-- 暗譜中バッジ（被り防止位置調整） -->
-      <div id="blindBadge" class="hidden absolute top-8 left-1/2 transform -translate-x-1/2 bg-red-900/90 border-2 border-amber-400 text-amber-300 text-xs px-3 py-1 rounded-full animate-pulse shadow-lg font-black z-20">
+      <!-- 暗譜中バッジ -->
+      <div id="blindBadge" class="hidden absolute top-7 left-1/2 transform -translate-x-1/2 bg-red-900/90 border-2 border-amber-400 text-amber-300 text-xs px-3 py-0.5 rounded-full animate-pulse shadow-lg font-black z-20">
         <i class="fa-solid fa-ghost mr-1"></i>暗譜中（ノーツ非表示）
       </div>
 
-      <div id="judgementPopup" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-150 text-center z-20">
-        <span id="judgementText" class="text-2xl sm:text-3xl font-black tracking-widest font-japanese drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">PERFECT</span>
+      <!-- 判定メッセージ（右手と左手レーンの中央に1行で配置） -->
+      <div id="judgementPopup" class="absolute top-[52%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-150 text-center z-30 whitespace-nowrap px-4 py-1 rounded-full bg-black/80 border border-amber-500/40 shadow-2xl">
+        <span id="judgementText" class="text-xl sm:text-2xl font-black tracking-wider font-japanese drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">天晴 (PERFECT)</span>
       </div>
 
       <!-- オーバーレイ（楽曲選択画面） -->
-      <div id="overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 text-center z-30 transition-all overflow-hidden">
+      <div id="overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 text-center z-40 transition-all overflow-hidden">
         
         <!-- 演舞終了時のスコア表示エリア -->
         <div id="resultScoreBoard" class="hidden w-full max-w-xs my-1 p-2 bg-red-950/80 border-2 border-amber-400 rounded-xl shadow-inner">
@@ -130,8 +131,8 @@
     </div>
   </main>
 
-  <!-- 太鼓操作エリア（縦幅を拡張して表示領域を拡大） -->
-  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[380px] max-h-[460px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black my-0 mb-2">
+  <!-- 太鼓操作エリア -->
+  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[360px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black mt-0 mb-1">
     <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
 
     <div class="relative z-10 w-full h-full grid grid-cols-2 gap-1 p-1">
@@ -151,9 +152,9 @@
     const HIT_X = 260; 
     const SPEED_SEC = 1.0; 
     
-    // 暗譜ボックスと被らないようレーンY位置を下にシフト
-    const Y_TOP = 240;    // 右手（上段）ノーツ中心Y座標
-    const Y_BOTTOM = 520; // 左手（下段）ノーツ中心Y座標
+    // レーンY位置
+    const Y_TOP = 220;    // 右手（上段）ノーツ中心Y座標
+    const Y_BOTTOM = 540; // 左手（下段）ノーツ中心Y座標
     
     const NOTE_RADIUS = 50;
     const LANE_HEIGHT = 110;
@@ -518,19 +519,19 @@
 
       if (type === 'PERFECT') {
         text.innerText = '天晴 (PERFECT!)';
-        text.className = 'text-2xl sm:text-3xl font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]';
+        text.className = 'text-xl sm:text-2xl font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,1)]';
         score += points; combo++;
       } else if (type === 'GREAT') {
         text.innerText = '見事 (GREAT)';
-        text.className = 'text-2xl sm:text-3xl font-black font-japanese text-red-400';
+        text.className = 'text-xl sm:text-2xl font-black font-japanese text-red-400';
         score += points; combo++;
       } else if (type === 'GOOD') {
         text.innerText = '良 (GOOD)';
-        text.className = 'text-xl sm:text-2xl font-bold font-japanese text-blue-400';
+        text.className = 'text-lg sm:text-xl font-bold font-japanese text-blue-400';
         score += points; combo++;
       } else {
         text.innerText = '不可 (MISS)';
-        text.className = 'text-xl sm:text-2xl font-bold font-japanese text-stone-500';
+        text.className = 'text-lg sm:text-xl font-bold font-japanese text-stone-400';
         combo = 0;
       }
 
@@ -538,7 +539,7 @@
       updateUI();
 
       clearTimeout(popup.timer);
-      popup.timer = setTimeout(() => popup.classList.add('opacity-0'), 350);
+      popup.timer = setTimeout(() => popup.classList.add('opacity-0'), 400);
     }
 
     function updateUI() {
