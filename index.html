@@ -73,7 +73,7 @@
   </header>
 
   <!-- 描画エリア（ゲーム画面） -->
-  <main class="relative shrink-0 w-full flex items-start justify-center min-h-0 overflow-hidden mt-0 mb-1">
+  <main class="relative shrink-0 w-full flex items-start justify-center min-h-0 overflow-hidden mt-0 mb-0">
     <div id="gameContainer" class="relative w-full max-h-[46vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center">
       
       <!-- スコア表示バー -->
@@ -90,21 +90,9 @@
         <i class="fa-solid fa-ghost mr-1"></i>暗譜中（ノーツ非表示）
       </div>
 
-      <!-- 判定メッセージ（右手と左手レーンの中央に1行で配置） -->
-      <div id="judgementPopup" class="absolute top-[52%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-150 text-center z-30 whitespace-nowrap px-4 py-1 rounded-full bg-black/80 border border-amber-500/40 shadow-2xl">
-        <span id="judgementText" class="text-xl sm:text-2xl font-black tracking-wider font-japanese drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">天晴 (PERFECT)</span>
-      </div>
-
       <!-- オーバーレイ（楽曲選択画面） -->
       <div id="overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-2 text-center z-40 transition-all overflow-hidden">
         
-        <!-- 演舞終了時のスコア表示エリア -->
-        <div id="resultScoreBoard" class="hidden w-full max-w-xs my-1 p-2 bg-red-950/80 border-2 border-amber-400 rounded-xl shadow-inner">
-          <p class="text-amber-300 text-xs font-bold mb-0.5">演舞結果</p>
-          <div id="finalScoreDisplay" class="text-xl font-black text-amber-400 font-japanese mb-0.5">SCORE: 0</div>
-          <div id="finalComboDisplay" class="text-xs font-bold text-amber-200">最大コンボ: 0</div>
-        </div>
-
         <!-- 楽曲リスト設定エリア -->
         <div class="w-full max-w-xs mb-2">
           <label class="block text-xs text-amber-200 font-bold mb-1 text-left">曲目一覧</label>
@@ -131,9 +119,23 @@
     </div>
   </main>
 
+  <!-- 判定メッセージ（ゲーム画面と太鼓の間の隙間エリア） -->
+  <div class="w-full h-8 flex items-center justify-center z-30 my-0.5 pointer-events-none">
+    <div id="judgementPopup" class="opacity-0 transition-opacity duration-150 text-center whitespace-nowrap px-4 py-1 rounded-full bg-black/85 border border-amber-500/50 shadow-2xl">
+      <span id="judgementText" class="text-lg sm:text-xl font-black tracking-wider font-japanese drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">天晴 (PERFECT)</span>
+    </div>
+  </div>
+
   <!-- 太鼓操作エリア -->
-  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[360px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black mt-0 mb-1">
+  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[350px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black mt-0 mb-1">
     <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
+
+    <!-- 演舞結果（太鼓画像上に被せて表示） -->
+    <div id="resultScoreBoard" class="hidden absolute top-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-xs p-3 bg-red-950/95 border-2 border-amber-400 rounded-2xl shadow-2xl z-20 text-center backdrop-blur-md">
+      <p class="text-amber-300 text-xs font-bold mb-1">演舞結果</p>
+      <div id="finalScoreDisplay" class="text-2xl font-black text-amber-400 font-japanese mb-1">SCORE: 0</div>
+      <div id="finalComboDisplay" class="text-sm font-bold text-amber-200">最大コンボ: 0</div>
+    </div>
 
     <div class="relative z-10 w-full h-full grid grid-cols-2 gap-1 p-1">
       <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/20 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
@@ -519,19 +521,19 @@
 
       if (type === 'PERFECT') {
         text.innerText = '天晴 (PERFECT!)';
-        text.className = 'text-xl sm:text-2xl font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,1)]';
+        text.className = 'text-lg sm:text-xl font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,1)]';
         score += points; combo++;
       } else if (type === 'GREAT') {
         text.innerText = '見事 (GREAT)';
-        text.className = 'text-xl sm:text-2xl font-black font-japanese text-red-400';
+        text.className = 'text-lg sm:text-xl font-black font-japanese text-red-400';
         score += points; combo++;
       } else if (type === 'GOOD') {
         text.innerText = '良 (GOOD)';
-        text.className = 'text-lg sm:text-xl font-bold font-japanese text-blue-400';
+        text.className = 'text-base sm:text-lg font-bold font-japanese text-blue-400';
         score += points; combo++;
       } else {
         text.innerText = '不可 (MISS)';
-        text.className = 'text-lg sm:text-xl font-bold font-japanese text-stone-400';
+        text.className = 'text-base sm:text-lg font-bold font-japanese text-stone-400';
         combo = 0;
       }
 
