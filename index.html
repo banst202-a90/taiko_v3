@@ -120,31 +120,54 @@
   </main>
 
   <!-- 判定メッセージ（ゲーム画面と太鼓の間の隙間エリア） -->
-  <div class="w-full h-8 flex items-center justify-center z-30 my-0.5 pointer-events-none">
-    <div id="judgementPopup" class="opacity-0 transition-opacity duration-150 text-center whitespace-nowrap px-4 py-1 rounded-full bg-black/85 border border-amber-500/50 shadow-2xl">
-      <span id="judgementText" class="text-lg sm:text-xl font-black tracking-wider font-japanese drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">天晴 (PERFECT)</span>
+  <div class="w-full h-7 flex items-center justify-center z-30 pointer-events-none">
+    <div id="judgementPopup" class="opacity-0 transition-opacity duration-150 text-center whitespace-nowrap px-4 py-0.5 rounded-full bg-black/85 border border-amber-500/50 shadow-2xl">
+      <span id="judgementText" class="text-base sm:text-lg font-black tracking-wider font-japanese drop-shadow-[0_2px_8px_rgba(0,0,0,1)]">天晴 (PERFECT)</span>
     </div>
   </div>
 
-  <!-- 太鼓操作エリア -->
-  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[350px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black mt-0 mb-1">
-    <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
-
-    <!-- 演舞結果（太鼓画像上に被せて表示） -->
-    <div id="resultScoreBoard" class="hidden absolute top-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-xs p-3 bg-red-950/95 border-2 border-amber-400 rounded-2xl shadow-2xl z-20 text-center backdrop-blur-md">
-      <p class="text-amber-300 text-xs font-bold mb-1">演舞結果</p>
-      <div id="finalScoreDisplay" class="text-2xl font-black text-amber-400 font-japanese mb-1">SCORE: 0</div>
-      <div id="finalComboDisplay" class="text-sm font-bold text-amber-200">最大コンボ: 0</div>
+  <!-- 太鼓操作エリア（枠上部に再生位置プログレスバーを配置） -->
+  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[350px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black mt-0 mb-1 flex flex-col">
+    
+    <!-- 曲の再生位置プログレスバー（目盛り＋逆三角形） -->
+    <div class="w-full bg-stone-950 border-b border-amber-700/60 px-3 py-1 flex flex-col justify-center relative z-20 shrink-0">
+      <!-- 逆三角形（ピン）コンテナ -->
+      <div class="relative w-full h-3">
+        <div id="progressBarMarker" class="absolute top-0 -translate-x-1/2 transition-all duration-75 text-amber-400 text-xs drop-shadow-[0_0_4px_rgba(245,158,11,0.8)]" style="left: 0%;">
+          <i class="fa-solid fa-caret-down"></i>
+        </div>
+      </div>
+      <!-- 目盛りバー -->
+      <div class="w-full h-1.5 bg-stone-800 rounded-full relative border border-amber-900/60 flex justify-between items-center overflow-visible">
+        <!-- 目盛り線 (25%, 50%, 75%) -->
+        <span class="absolute left-0 top-0 bottom-0 w-0.5 bg-amber-500"></span>
+        <span class="absolute left-1/4 top-0 bottom-0 w-0.5 bg-stone-600"></span>
+        <span class="absolute left-2/4 top-0 bottom-0 w-0.5 bg-amber-600/80"></span>
+        <span class="absolute left-3/4 top-0 bottom-0 w-0.5 bg-stone-600"></span>
+        <span class="absolute right-0 top-0 bottom-0 w-0.5 bg-amber-500"></span>
+      </div>
     </div>
 
-    <div class="relative z-10 w-full h-full grid grid-cols-2 gap-1 p-1">
-      <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/20 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
-        <span class="text-white/80 font-black font-japanese text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] pointer-events-none">左手</span>
-      </button>
+    <!-- 太鼓画像＆入力エリア -->
+    <div class="relative flex-1 w-full h-full overflow-hidden">
+      <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
 
-      <button id="btnRight" class="drum-pad h-full bg-transparent border border-amber-600/20 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
-        <span class="text-white/80 font-black font-japanese text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] pointer-events-none">右手</span>
-      </button>
+      <!-- 演舞結果（太鼓画像上に被せて表示） -->
+      <div id="resultScoreBoard" class="hidden absolute top-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-xs p-3 bg-red-950/95 border-2 border-amber-400 rounded-2xl shadow-2xl z-20 text-center backdrop-blur-md">
+        <p class="text-amber-300 text-xs font-bold mb-1">演舞結果</p>
+        <div id="finalScoreDisplay" class="text-2xl font-black text-amber-400 font-japanese mb-1">SCORE: 0</div>
+        <div id="finalComboDisplay" class="text-sm font-bold text-amber-200">最大コンボ: 0</div>
+      </div>
+
+      <div class="relative z-10 w-full h-full grid grid-cols-2 gap-1 p-1">
+        <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/20 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
+          <span class="text-white/80 font-black font-japanese text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] pointer-events-none">左手</span>
+        </button>
+
+        <button id="btnRight" class="drum-pad h-full bg-transparent border border-amber-600/20 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
+          <span class="text-white/80 font-black font-japanese text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] pointer-events-none">右手</span>
+        </button>
+      </div>
     </div>
   </footer>
 
@@ -180,6 +203,7 @@
     const songSelect = document.getElementById('songSelect');
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const progressBarMarker = document.getElementById('progressBarMarker');
 
     window.addEventListener('DOMContentLoaded', async () => {
       await loadSongList();
@@ -325,6 +349,15 @@
       if (!isPlaying) return;
 
       const currentTime = bgmAudio.currentTime;
+      const duration = bgmAudio.duration;
+
+      // 再生位置マーカーの移動更新
+      if (duration && duration > 0) {
+        const progressPercent = Math.min(100, Math.max(0, (currentTime / duration) * 100));
+        progressBarMarker.style.left = `${progressPercent}%`;
+      } else {
+        progressBarMarker.style.left = '0%';
+      }
 
       ctx.fillStyle = '#1e0505';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -390,7 +423,7 @@
 
       drawParticles();
 
-      if (bgmAudio.ended || (bgmAudio.duration && currentTime >= bgmAudio.duration)) {
+      if (bgmAudio.ended || (duration && currentTime >= duration)) {
         endGame();
         return;
       }
@@ -521,19 +554,19 @@
 
       if (type === 'PERFECT') {
         text.innerText = '天晴 (PERFECT!)';
-        text.className = 'text-lg sm:text-xl font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,1)]';
+        text.className = 'text-base sm:text-lg font-black font-japanese text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,1)]';
         score += points; combo++;
       } else if (type === 'GREAT') {
         text.innerText = '見事 (GREAT)';
-        text.className = 'text-lg sm:text-xl font-black font-japanese text-red-400';
+        text.className = 'text-base sm:text-lg font-black font-japanese text-red-400';
         score += points; combo++;
       } else if (type === 'GOOD') {
         text.innerText = '良 (GOOD)';
-        text.className = 'text-base sm:text-lg font-bold font-japanese text-blue-400';
+        text.className = 'text-sm sm:text-base font-bold font-japanese text-blue-400';
         score += points; combo++;
       } else {
         text.innerText = '不可 (MISS)';
-        text.className = 'text-base sm:text-lg font-bold font-japanese text-stone-400';
+        text.className = 'text-sm sm:text-base font-bold font-japanese text-stone-400';
         combo = 0;
       }
 
@@ -554,6 +587,7 @@
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       bgmAudio.currentTime = 0;
+      progressBarMarker.style.left = '0%';
 
       resetBtn.classList.add('hidden');
       document.getElementById('resultScoreBoard').classList.add('hidden');
@@ -566,6 +600,7 @@
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       resetBtn.classList.add('hidden');
+      progressBarMarker.style.left = '100%';
 
       const overlay = document.getElementById('overlay');
       document.getElementById('finalScoreDisplay').innerText = `SCORE: ${score}`;
