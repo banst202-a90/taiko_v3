@@ -40,7 +40,7 @@
     }
   </style>
 </head>
-<body class="bg-festival text-white h-screen flex flex-col justify-start items-center overflow-hidden p-2 pb-8 gap-2">
+<body class="bg-festival text-white h-screen flex flex-col justify-between items-center overflow-hidden p-2 pb-4 gap-2">
 
   <!-- 音源要素 -->
   <audio id="bgmAudio" preload="auto"></audio>
@@ -74,7 +74,7 @@
 
   <!-- 描画エリア（ゲーム画面） -->
   <main class="relative shrink-0 w-full flex items-start justify-center min-h-0 overflow-hidden my-0">
-    <div id="gameContainer" class="relative w-full max-h-[50vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center">
+    <div id="gameContainer" class="relative w-full max-h-[48vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center">
       
       <!-- スコア表示バー -->
       <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-1 z-20 flex justify-between text-xs text-amber-200 px-3 font-black tracking-wide">
@@ -85,7 +85,8 @@
 
       <canvas id="gameCanvas" width="1280" height="720" class="w-full h-full block z-10 object-contain"></canvas>
 
-      <div id="blindBadge" class="hidden absolute top-6 left-1/2 transform -translate-x-1/2 bg-red-900/90 border-2 border-amber-400 text-amber-300 text-xs px-2.5 py-0.5 rounded-full animate-pulse shadow-lg font-black z-20">
+      <!-- 暗譜中バッジ（被り防止位置調整） -->
+      <div id="blindBadge" class="hidden absolute top-8 left-1/2 transform -translate-x-1/2 bg-red-900/90 border-2 border-amber-400 text-amber-300 text-xs px-3 py-1 rounded-full animate-pulse shadow-lg font-black z-20">
         <i class="fa-solid fa-ghost mr-1"></i>暗譜中（ノーツ非表示）
       </div>
 
@@ -129,8 +130,8 @@
     </div>
   </main>
 
-  <!-- 太鼓操作エリア（大幅に上に寄せて高さを調整、最下部に空白確保） -->
-  <footer class="relative w-full max-w-lg shrink-0 h-[220px] sm:h-[260px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black my-0 mb-6">
+  <!-- 太鼓操作エリア（縦幅を拡張して表示領域を拡大） -->
+  <footer class="relative w-full max-w-lg shrink-0 flex-1 min-h-[380px] max-h-[460px] rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black my-0 mb-2">
     <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
 
     <div class="relative z-10 w-full h-full grid grid-cols-2 gap-1 p-1">
@@ -149,11 +150,14 @@
     const CANVAS_HEIGHT = 720;
     const HIT_X = 260; 
     const SPEED_SEC = 1.0; 
-    const Y_TOP = 190;
-    const Y_BOTTOM = 480;
-    const NOTE_RADIUS = 54;
-    const LANE_HEIGHT = 120;
-    const TEXT_BELT_HEIGHT = 75;
+    
+    // 暗譜ボックスと被らないようレーンY位置を下にシフト
+    const Y_TOP = 240;    // 右手（上段）ノーツ中心Y座標
+    const Y_BOTTOM = 520; // 左手（下段）ノーツ中心Y座標
+    
+    const NOTE_RADIUS = 50;
+    const LANE_HEIGHT = 110;
+    const TEXT_BELT_HEIGHT = 70;
 
     let songs = {}; 
     let currentSongKey = null;
@@ -429,7 +433,7 @@
       const textY = beltTop + (TEXT_BELT_HEIGHT / 2);
 
       ctx.fillStyle = '#111111';
-      ctx.font = '900 58px "Zen Maru Gothic", sans-serif';
+      ctx.font = '900 56px "Zen Maru Gothic", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
