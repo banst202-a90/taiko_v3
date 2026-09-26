@@ -814,11 +814,7 @@
     const btnLeft = document.getElementById('btnLeft');
     const btnRight = document.getElementById('btnRight');
 
-    btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); triggerHit(false); }, {passive: false});
-    btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); triggerHit(true); }, {passive: false});
-    btnLeft.addEventListener('mousedown', () => triggerHit(false));
-    btnRight.addEventListener('mousedown', () => triggerHit(true));
-
+    
     function pauseBgmOnLeave() {
       if (isPlaying && !isPaused && !isGameEnded) {
         togglePause();
@@ -834,6 +830,32 @@
     window.addEventListener('pagehide', pauseBgmOnLeave);
     window.addEventListener('unload', pauseBgmOnLeave);
     window.addEventListener('blur', pauseBgmOnLeave);
+
+    // --- タップ/クリックイベントの重複防止処理 ---
+    let isTouchDevice = false;
+
+    btnLeft.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isTouchDevice = true;
+      triggerHit(false);
+    }, {passive: false});
+
+    btnLeft.addEventListener('mousedown', () => {
+      if (isTouchDevice) return;
+      triggerHit(false);
+    });
+
+    btnRight.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isTouchDevice = true;
+      triggerHit(true);
+    }, {passive: false});
+
+    btnRight.addEventListener('mousedown', () => {
+      if (isTouchDevice) return;
+      triggerHit(true);
+    });
+
   </script>
 </body>
 </html>
