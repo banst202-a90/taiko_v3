@@ -87,10 +87,10 @@
   </header>
 
   <!-- アプリメインエリア -->
-  <main class="relative w-full h-[calc(100vh-42px)] flex flex-col overflow-hidden gap-1">
+  <main class="relative w-full flex-1 flex flex-col overflow-hidden gap-1">
 
     <!-- スタート画面（タイトル・曲選択） -->
-    <div id="overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 text-center transition-opacity duration-500 ease-in-out bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(13,2,2,0.6), rgba(13,2,2,0.4), rgba(13,2,2,0.8)), url('大島八幡社.jpg');">
+    <div id="overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 text-center transition-opacity duration-300 ease-in-out bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(13,2,2,0.6), rgba(13,2,2,0.4), rgba(13,2,2,0.8)), url('大島八幡社.jpg');">
       
       <!-- 曲選択 & 速度調整フォーム -->
       <div class="w-full max-w-xs bg-black/80 backdrop-blur-md p-4 rounded-2xl border border-amber-600/50 shadow-2xl space-y-3">
@@ -124,8 +124,8 @@
 
     </div>
 
-    <!-- 描画エリア（レーン表示：太鼓領域と幅を合わせるため枠線を収まるよう調整） -->
-    <div id="gameContainer" class="relative shrink-0 w-full max-h-[45vh] aspect-[16/9] bg-black rounded-xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center box-border">
+    <!-- 描画エリア（太鼓エリアと同一の枠サイズに完全に調整） -->
+    <div id="gameContainer" class="relative shrink-0 w-full max-h-[45vh] aspect-[16/9] bg-black rounded-2xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center box-border">
       <canvas id="gameCanvas" width="1280" height="720" class="w-full h-full block z-10 object-contain"></canvas>
 
       <div id="blindBadge" class="hidden absolute top-3 left-1/2 transform -translate-x-1/2 bg-red-900/90 border border-amber-400 text-amber-300 text-[9px] px-2 py-0.5 rounded-full animate-pulse shadow-lg font-bold z-20">
@@ -158,7 +158,7 @@
       </div>
 
       <!-- 結果発表モーダル -->
-      <div id="resultBox" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 p-3 bg-stone-900/95 border-2 border-amber-500 rounded-xl text-amber-200 text-xs w-[90%] max-w-sm text-center shadow-2xl backdrop-blur-md">
+      <div id="resultBox" class="hidden absolute inset-x-4 top-1/2 transform -translate-y-1/2 z-40 p-3 bg-stone-900/95 border-2 border-amber-500 rounded-xl text-amber-200 text-xs text-center shadow-2xl backdrop-blur-md">
         <div class="text-sm font-bold text-amber-400 mb-0.5 font-japanese">演舞 判定結果</div>
         <div id="finalScoreText" class="text-xs font-extrabold text-amber-300">SCORE: 0 / 0</div>
         <div id="maxComboText" class="text-[10px] font-bold text-amber-200 mt-0.5">MAX COMBO: 0 / 0</div>
@@ -232,6 +232,7 @@
     let currentSongKey = null;
     let isPlaying = false;
     let isPaused = false;
+    let isGameEnded = false; // 曲終了重複防止フラグ
     let speedMultiplier = 1.0;
     let isBlindMode = false;
     let score = 0;
@@ -386,6 +387,7 @@
 
       particles = [];
       isPaused = false;
+      isGameEnded = false;
       updatePauseButtonUI();
 
       notes = [];
@@ -418,7 +420,7 @@
     }
 
     function togglePause() {
-      if (!isPlaying) return;
+      if (!isPlaying || isGameEnded) return;
 
       isPaused = !isPaused;
       if (isPaused) {
@@ -447,7 +449,7 @@
     }
 
     function gameLoop() {
-      if (!isPlaying || isPaused) return;
+      if (!isPlaying || isPaused || isGameEnded) return;
 
       const currentTime = bgmAudio.currentTime;
       const duration = bgmAudio.duration || 1;
@@ -622,7 +624,7 @@
     }
 
     function triggerHit(isRight = true) {
-      if (!isPlaying || isPaused) return;
+      if (!isPlaying || isPaused || isGameEnded) return;
 
       const targetY = isRight ? Y_TOP : Y_BOTTOM;
       spawnFireworkEffect(HIT_X, targetY);
@@ -689,6 +691,7 @@
     function resetToTitle() {
       isPlaying = false;
       isPaused = false;
+      isGameEnded = false;
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       bgmAudio.currentTime = 0;
@@ -699,13 +702,15 @@
       pauseBtn.classList.add('hidden');
       pauseOverlay.classList.add('hidden');
       document.getElementById('resultBox').classList.add('hidden');
-      document.getElementById('startBtn').innerText = '演舞開始';
       document.getElementById('overlay').classList.remove('opacity-0', 'pointer-events-none');
     }
 
     function endGame() {
+      if (isGameEnded) return;
+      isGameEnded = true;
       isPlaying = false;
       isPaused = false;
+
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       resetBtn.classList.add('hidden');
@@ -759,7 +764,7 @@
         motivationBox.classList.add('hidden');
       }
 
-      // 画面切り替え（overlayを表示）を行わず、結果ダイアログのみ表示してユーザーのタップ操作を待つ
+      // 判定結果モーダルを表示（タップ操作まで画面保持）
       document.getElementById('resultBox').classList.remove('hidden');
     }
 
@@ -800,7 +805,7 @@
     btnRight.addEventListener('mousedown', () => triggerHit(true));
 
     function pauseBgmOnLeave() {
-      if (isPlaying && !isPaused) {
+      if (isPlaying && !isPaused && !isGameEnded) {
         togglePause();
       }
     }
