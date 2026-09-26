@@ -85,6 +85,7 @@
       <!-- スコア表示バー -->
       <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-1 z-20 flex justify-between text-[10px] text-amber-200 px-3 font-bold">
         <span id="speedDisplay">速度: 1.0x</span>
+        <span id="timeDisplay" class="text-amber-200 font-mono">00:00 / 00:00</span>
         <span id="comboDisplay" class="text-amber-400 font-extrabold">0 COMBO</span>
         <span id="scoreDisplay">SCORE: 0</span>
       </div>
@@ -355,12 +356,27 @@
       }
     }
 
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return '00:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
     function gameLoop() {
       if (!isPlaying || isPaused) return;
 
       const currentTime = bgmAudio.currentTime;
+      const duration = bgmAudio.duration || 1;
 
-      // 背景色
+      // タイム表示の更新
+      document.getElementById('timeDisplay').innerText = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+
+      // 描画設定のリセット
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1.0;
+
+      // キャンバス全体クリア
       ctx.fillStyle = '#1e0505';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -397,6 +413,13 @@
         ctx.lineWidth = 2;
         ctx.stroke();
       });
+
+      // 曲進行状況のプログレスバー描画（最上部）
+      const progressRatio = Math.min(Math.max(currentTime / duration, 0), 1);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, 8);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, 0, CANVAS_WIDTH * progressRatio, 8);
 
       // ノーツ描画
       notes.forEach((note) => {
