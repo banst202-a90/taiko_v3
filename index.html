@@ -713,8 +713,8 @@
       const goodPct = Math.round((goodCount / total) * 100);
       const missPct = Math.max(0, 100 - (perfPct + greatPct + goodPct));
 
-      // 精度（％）
-      const accuracy = Math.round(((perfectCount * 1.0 + greatCount * 0.8 + goodCount * 0.5) / total) * 100);
+      // 精度（％）: 不以外（天晴＋見事＋可）の割合
+      const accuracy = Math.round(((perfectCount + greatCount + goodCount) / total) * 100);
 
       // 積み上げグラフの更新
       document.getElementById('barPerfect').style.width = perfPct + '%';
