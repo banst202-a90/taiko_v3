@@ -53,11 +53,17 @@
       </div>
       <div>
         <h1 class="text-xs font-bold text-amber-400 font-japanese leading-none">和太鼓 練習アプリ</h1>
-        <p id="currentSongTitle" class="text-[8px] text-red-300 truncate max-w-[150px]">楽曲未選択</p>
+        <p id="currentSongTitle" class="text-[8px] text-red-300 truncate max-w-[120px]">楽曲未選択</p>
       </div>
     </div>
 
     <div class="flex items-center gap-1.5">
+      <!-- 一時停止 / 再開ボタン -->
+      <button id="pauseBtn" class="hidden bg-amber-800 active:bg-amber-900 border border-amber-400 text-amber-200 text-[10px] px-2 py-0.5 rounded-lg font-bold shadow-md flex items-center gap-1">
+        <i id="pauseIcon" class="fa-solid fa-pause"></i>
+        <span id="pauseText">一時停止</span>
+      </button>
+
       <button id="resetBtn" class="hidden bg-stone-800 active:bg-stone-900 border border-amber-500/50 text-amber-300 text-[10px] px-2 py-0.5 rounded-lg font-bold shadow-md">
         <i class="fa-solid fa-rotate-left mr-0.5"></i>曲選択へ
       </button>
@@ -87,6 +93,13 @@
 
       <div id="blindBadge" class="hidden absolute top-6 left-1/2 transform -translate-x-1/2 bg-red-900/90 border border-amber-400 text-amber-300 text-[9px] px-2 py-0.5 rounded-full animate-pulse shadow-lg font-bold z-20">
         <i class="fa-solid fa-ghost mr-1"></i>暗譜中（ノーツ非表示）
+      </div>
+
+      <!-- 一時停止中表示オーバーレイ -->
+      <div id="pauseOverlay" class="hidden absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-25 pointer-events-none">
+        <span class="text-2xl font-bold font-japanese text-amber-300 border-2 border-amber-400 px-4 py-1 rounded-xl bg-black/70 shadow-2xl">
+          <i class="fa-solid fa-pause mr-2"></i>一時停止中
+        </span>
       </div>
 
       <div id="judgementPopup" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-150 text-center z-20">
@@ -150,6 +163,7 @@
     let songs = {}; 
     let currentSongKey = null;
     let isPlaying = false;
+    let isPaused = false;
     let speedMultiplier = 1.0;
     let isBlindMode = false;
     let score = 0;
@@ -165,6 +179,10 @@
     const songSelect = document.getElementById('songSelect');
     const startBtn = document.getElementById('startBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const pauseText = document.getElementById('pauseText');
+    const pauseOverlay = document.getElementById('pauseOverlay');
 
     window.addEventListener('DOMContentLoaded', async () => {
       await loadSongList();
@@ -283,6 +301,8 @@
       combo = 0;
       maxCombo = 0;
       particles = [];
+      isPaused = false;
+      updatePauseButtonUI();
       updateUI();
 
       notes = [];
@@ -296,6 +316,7 @@
       isPlaying = true;
       document.getElementById('overlay').classList.add('opacity-0', 'pointer-events-none');
       resetBtn.classList.remove('hidden');
+      pauseBtn.classList.remove('hidden');
 
       bgmAudio.currentTime = 0;
       bgmAudio.playbackRate = speedMultiplier;
@@ -305,8 +326,37 @@
       gameLoop();
     }
 
-    function gameLoop() {
+    function togglePause() {
       if (!isPlaying) return;
+
+      isPaused = !isPaused;
+      if (isPaused) {
+        bgmAudio.pause();
+        pauseOverlay.classList.remove('hidden');
+      } else {
+        bgmAudio.play().catch(e => console.warn("再開エラー:", e));
+        pauseOverlay.classList.add('hidden');
+        gameLoop();
+      }
+      updatePauseButtonUI();
+    }
+
+    function updatePauseButtonUI() {
+      if (isPaused) {
+        pauseIcon.className = 'fa-solid fa-play';
+        pauseText.innerText = '再開';
+        pauseBtn.classList.remove('bg-amber-800', 'active:bg-amber-900');
+        pauseBtn.classList.add('bg-emerald-700', 'active:bg-emerald-800');
+      } else {
+        pauseIcon.className = 'fa-solid fa-pause';
+        pauseText.innerText = '一時停止';
+        pauseBtn.classList.remove('bg-emerald-700', 'active:bg-emerald-800');
+        pauseBtn.classList.add('bg-amber-800', 'active:bg-amber-900');
+      }
+    }
+
+    function gameLoop() {
+      if (!isPlaying || isPaused) return;
 
       const currentTime = bgmAudio.currentTime;
 
@@ -466,10 +516,10 @@
     }
 
     function triggerHit(isRight = true) {
+      if (!isPlaying || isPaused) return;
+
       const targetY = isRight ? Y_TOP : Y_BOTTOM;
       spawnFireworkEffect(HIT_X, targetY);
-
-      if (!isPlaying) return;
 
       const currentTime = bgmAudio.currentTime;
       let closestNote = null;
@@ -531,20 +581,26 @@
 
     function resetToTitle() {
       isPlaying = false;
+      isPaused = false;
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       bgmAudio.currentTime = 0;
 
       resetBtn.classList.add('hidden');
+      pauseBtn.classList.add('hidden');
+      pauseOverlay.classList.add('hidden');
       document.getElementById('startBtn').innerText = '演舞開始';
       document.getElementById('overlay').classList.remove('opacity-0', 'pointer-events-none');
     }
 
     function endGame() {
       isPlaying = false;
+      isPaused = false;
       cancelAnimationFrame(animationFrameId);
       bgmAudio.pause();
       resetBtn.classList.add('hidden');
+      pauseBtn.classList.add('hidden');
+      pauseOverlay.classList.add('hidden');
 
       const overlay = document.getElementById('overlay');
       document.getElementById('overlayTitle').innerText = '演舞 終了！';
@@ -553,6 +609,7 @@
     }
 
     resetBtn.addEventListener('click', resetToTitle);
+    pauseBtn.addEventListener('click', togglePause);
     startBtn.addEventListener('click', initGame);
 
     document.getElementById('blindToggle').addEventListener('change', (e) => {
@@ -581,10 +638,10 @@
     btnLeft.addEventListener('mousedown', () => triggerHit(false));
     btnRight.addEventListener('mousedown', () => triggerHit(true));
 
-    // --- ここから追加：LINE内ブラウザ等の画面離脱時に音楽を止める処理 ---
+    // 画面離脱時に自動で音楽を一時停止する処理
     function pauseBgmOnLeave() {
-      if (bgmAudio && !bgmAudio.paused) {
-        bgmAudio.pause();
+      if (isPlaying && !isPaused) {
+        togglePause();
       }
     }
 
@@ -597,7 +654,6 @@
     window.addEventListener('pagehide', pauseBgmOnLeave);
     window.addEventListener('unload', pauseBgmOnLeave);
     window.addEventListener('blur', pauseBgmOnLeave);
-    // --- ここまで ---
   </script>
 </body>
 </html>
