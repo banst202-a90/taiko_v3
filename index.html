@@ -38,6 +38,11 @@
       background-color: rgba(245, 158, 11, 0.15);
       box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.4);
     }
+
+    /* 太鼓の上の「左手」「右手」テキストのスタイル */
+    .hand-label {
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8);
+    }
   </style>
 </head>
 <body class="bg-festival text-white h-screen flex flex-col justify-start overflow-hidden p-2 pt-1 gap-1">
@@ -101,13 +106,7 @@
 
       <!-- スタート / 楽曲選択画面 -->
       <div id="overlay" class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-3 text-center z-30 transition-all overflow-y-auto">
-        <h2 id="overlayTitle" class="text-base font-bold font-japanese text-amber-400 mb-2">和太鼓 演舞演習</h2>
-        
-        <div id="resultBox" class="hidden mb-3 p-2 bg-stone-900/90 border border-amber-500 rounded-lg text-amber-200 text-xs w-full max-w-xs">
-          <div class="text-sm font-bold text-amber-400 mb-1">演奏結果</div>
-          <div id="finalScoreText" class="text-base font-extrabold text-amber-300">SCORE: 0 / 0</div>
-          <div id="maxComboText" class="text-xs font-bold text-amber-200 mt-0.5">MAX COMBO: 0 / 0</div>
-        </div>
+        <h2 id="overlayTitle" class="text-base font-bold font-japanese text-amber-400 mb-2">演舞終了！</h2>
 
         <!-- 楽曲リスト設定エリア -->
         <div class="w-full max-w-xs mb-3">
@@ -127,15 +126,15 @@
           </div>
         </div>
 
-        <button id="startBtn" disabled class="w-full max-w-xs py-2 bg-gradient-to-r from-red-700 to-amber-600 text-amber-100 font-bold font-japanese text-xs rounded-xl shadow-lg border border-amber-300 disabled:opacity-50 transition-transform active:scale-95">
-          演舞開始
+        <button id="startBtn" class="w-full max-w-xs py-2 bg-gradient-to-r from-red-700 to-amber-600 text-amber-100 font-bold font-japanese text-xs rounded-xl shadow-lg border border-amber-300 disabled:opacity-50 transition-transform active:scale-95">
+          もう一度挑戦
         </button>
       </div>
 
     </div>
   </main>
 
-  <!-- 操作ボタンエリア（太鼓＋上部シークバー＋スコア表示バー） -->
+  <!-- 操作ボタンエリア（太鼓＋上部シークバー＋スコア表示バー＋演奏結果表示） -->
   <footer class="relative w-full flex-1 h-[48vh] min-h-0 rounded-2xl border-2 border-amber-700/60 overflow-hidden shadow-2xl bg-black flex flex-col">
     
     <!-- 太鼓の上のタイムシークバー（横グラフ表示） -->
@@ -150,14 +149,26 @@
       <span id="scoreDisplay">SCORE: 0 / 0</span>
     </div>
 
+    <!-- 演奏結果表示パネル（太鼓の上側エリア最前面に配置） -->
+    <div id="resultBox" class="hidden absolute top-8 left-1/2 transform -translate-x-1/2 z-30 p-2 bg-stone-900/90 border border-amber-500 rounded-lg text-amber-200 text-xs w-[90%] max-w-xs text-center shadow-2xl backdrop-blur-sm">
+      <div class="text-xs font-bold text-amber-400 mb-0.5">演奏結果</div>
+      <div id="finalScoreText" class="text-sm font-extrabold text-amber-300">SCORE: 31200 / 61000</div>
+      <div id="maxComboText" class="text-[11px] font-bold text-amber-200 mt-0.5">MAX COMBO: 14 / 61</div>
+    </div>
+
+    <!-- 太鼓本体＆タップ領域 -->
     <div class="relative flex-1 w-full h-full">
       <img src="taiko.jpg" alt="太鼓" class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none z-0">
 
       <div class="relative z-10 w-full h-full grid grid-cols-2 gap-2 p-1">
-        <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none">
+        <!-- 左手エリア -->
+        <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
+          <span class="hand-label text-stone-200 text-lg font-extrabold font-japanese bg-stone-900/40 border border-stone-500/50 px-3 py-1 rounded-md pointer-events-none">左手</span>
         </button>
 
-        <button id="btnRight" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none">
+        <!-- 右手エリア -->
+        <button id="btnRight" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
+          <span class="hand-label text-stone-200 text-lg font-extrabold font-japanese bg-stone-900/40 border border-stone-500/50 px-3 py-1 rounded-md pointer-events-none">右手</span>
         </button>
       </div>
     </div>
@@ -649,7 +660,7 @@
       const overlay = document.getElementById('overlay');
       document.getElementById('overlayTitle').innerText = '演舞 終了！';
       
-      // 演奏結果の表示（スコア / 満点、MAX COMBO / 総ノーツ数）
+      // 太鼓上部の最前面に演奏結果（SCORE, MAX COMBO）を表示
       document.getElementById('finalScoreText').innerText = `SCORE: ${score} / ${maxScore}`;
       document.getElementById('maxComboText').innerText = `MAX COMBO: ${maxCombo} / ${totalNotesCount}`;
       document.getElementById('resultBox').classList.remove('hidden');
