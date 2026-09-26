@@ -39,12 +39,13 @@
       box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.4);
     }
 
-    /* 太鼓の上の「左手」「右手」テキスト（ノーツフォントと統一） */
+    /* 添付画像にあわせた「左手」「右手」テキスト（和風フォント・白色・やわらかな黒シャドウ） */
     .hand-label {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      font-weight: 900;
-      color: #f59e0b;
-      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 10px rgba(0,0,0,0.9);
+      font-family: 'Yuji Syuku', serif;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75), 0 0 12px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.1em;
     }
   </style>
 </head>
@@ -104,7 +105,7 @@
       </div>
 
       <div id="judgementPopup" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-150 text-center z-20">
-        <span id="judgementText" class="text-2xl font-extrabold tracking-widest font-japanese drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">PERFECT</span>
+        <span id="judgementText" class="text-2xl font-extrabold tracking-widest font-japanese drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">天晴</span>
       </div>
 
       <!-- スタート / 楽曲選択画面 -->
@@ -152,13 +153,18 @@
       <span id="scoreDisplay">SCORE: 0 / 0</span>
     </div>
 
-    <!-- 演奏結果表示パネル（太鼓の上側エリア最前面に配置） -->
-    <div id="resultBox" class="hidden absolute top-8 left-1/2 transform -translate-x-1/2 z-30 p-2 bg-stone-900/90 border border-amber-500 rounded-lg text-amber-200 text-xs w-[90%] max-w-xs text-center shadow-2xl backdrop-blur-sm">
+    <!-- 演奏結果表示パネル（天晴/見事/可/不可 の4項目全表示） -->
+    <div id="resultBox" class="hidden absolute top-8 left-1/2 transform -translate-x-1/2 z-30 p-2.5 bg-stone-900/95 border border-amber-500 rounded-lg text-amber-200 text-xs w-[92%] max-w-xs text-center shadow-2xl backdrop-blur-sm">
       <div class="text-xs font-bold text-amber-400 mb-0.5">演奏結果</div>
       <div id="finalScoreText" class="text-sm font-extrabold text-amber-300">SCORE: 0 / 0</div>
       <div id="maxComboText" class="text-[11px] font-bold text-amber-200 mt-0.5">MAX COMBO: 0 / 0</div>
-      <div id="breakdownText" class="text-[10px] font-bold text-amber-400/90 mt-1 pt-1 border-t border-amber-500/30">
-        天晴 0% / 見事 0% / 不可 0%
+      
+      <!-- 各判定の内訳（天晴・見事・可・不可） -->
+      <div id="breakdownDetails" class="text-[10px] font-bold text-amber-300/90 mt-1.5 pt-1.5 border-t border-amber-500/30 grid grid-cols-2 gap-x-2 gap-y-0.5 text-left px-2">
+        <div>天晴: <span id="perfectDetail" class="text-amber-300">0 (0%)</span></div>
+        <div>見事: <span id="greatDetail" class="text-amber-400">0 (0%)</span></div>
+        <div>　可: <span id="goodDetail" class="text-blue-300">0 (0%)</span></div>
+        <div>不可: <span id="missDetail" class="text-stone-400">0 (0%)</span></div>
       </div>
     </div>
 
@@ -169,12 +175,12 @@
       <div class="relative z-10 w-full h-full grid grid-cols-2 gap-2 p-1">
         <!-- 左手エリア -->
         <button id="btnLeft" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
-          <span class="hand-label text-xl tracking-wider pointer-events-none">左手</span>
+          <span class="hand-label text-2xl tracking-wider pointer-events-none">左手</span>
         </button>
 
         <!-- 右手エリア -->
         <button id="btnRight" class="drum-pad h-full bg-transparent border border-amber-600/30 rounded-xl touch-none select-none transition-all outline-none flex items-center justify-center">
-          <span class="hand-label text-xl tracking-wider pointer-events-none">右手</span>
+          <span class="hand-label text-2xl tracking-wider pointer-events-none">右手</span>
         </button>
       </div>
     </div>
@@ -191,6 +197,15 @@
     const LANE_HEIGHT = 100;       // 黒色の流れるレーン高さ
     const TEXT_BELT_HEIGHT = 60;  // 下部白帯の高さ
 
+    // ==========================================
+    // 【判定許容時間の設定（秒単位）】
+    // 調整したい場合は以下の数値を書き換えてください。
+    // ==========================================
+    const JUDGE_PERFECT_SEC = 0.05; // 「天晴 (PERFECT)」 許容時間（旧: 0.03s → 新: 0.05s）
+    const JUDGE_GREAT_SEC   = 0.10; // 「見事 (GREAT)」   許容時間（旧: 0.07s → 新: 0.10s）
+    const JUDGE_GOOD_SEC    = 0.18; // 「可 (GOOD)」     許容時間（旧: 0.12s → 新: 0.18s）
+    const MISS_CUTOFF_SEC   = 0.20; // 見逃し「不可 (MISS)」判定とする時間（旧: 0.12s → 新: 0.20s）
+
     let songs = {}; 
     let currentSongKey = null;
     let isPlaying = false;
@@ -203,6 +218,7 @@
     let maxCombo = 0;
     let totalNotesCount = 0;
 
+    // 採点項目カウント（天晴・見事・可・不可）
     let perfectCount = 0;
     let greatCount = 0;
     let goodCount = 0;
@@ -357,7 +373,6 @@
         notes.push({ hitTime: n.time, yPos: Y_BOTTOM, type: n.type, hit: false, missed: false });
       });
 
-      // ノーツ総数と満点の計算
       totalNotesCount = notes.length;
       maxScore = totalNotesCount * 1000;
       updateUI();
@@ -415,11 +430,9 @@
       const progressRatio = Math.min(Math.max(currentTime / duration, 0), 1);
       seekBarFill.style.width = (progressRatio * 100).toFixed(2) + '%';
 
-      // 描画設定のリセット
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1.0;
 
-      // キャンバス全体クリア
       ctx.fillStyle = '#1e0505';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -443,7 +456,6 @@
         ctx.lineTo(CANVAS_WIDTH, beltTop);
         ctx.stroke();
 
-        // レーン左側の「右手」「左手」文字描画
         ctx.fillStyle = '#f59e0b';
         ctx.font = '900 36px "Zen Maru Gothic", sans-serif';
         ctx.textAlign = 'left';
@@ -466,11 +478,12 @@
         ctx.stroke();
       });
 
-      // ノーツ描画
+      // ノーツ判定 & 描画
       notes.forEach((note) => {
         const timeDiff = note.hitTime - currentTime;
 
-        if (timeDiff < -0.12 && !note.hit && !note.missed) {
+        // ノーツを見逃した場合のMISS判定（MISS_CUTOFF_SEC を超過した場合）
+        if (timeDiff < -MISS_CUTOFF_SEC && !note.hit && !note.missed) {
           note.missed = true;
           handleJudgement('MISS');
         }
@@ -544,14 +557,12 @@
       ctx.restore();
     }
 
-    // タップ時のリング状花火エフェクト生成
     function spawnFireworkEffect(x, y) {
       const colors = ['#fbbf24', '#f59e0b', '#ef4444', '#fef08a', '#ffffff'];
-      const particleCount = 36; // 円周上に配置する粒子の数
+      const particleCount = 36;
 
       for (let i = 0; i < particleCount; i++) {
         const angle = (i / particleCount) * Math.PI * 2;
-        // リング状に均一な速度で外側へ広がる
         const speed = 7.5 + (Math.random() * 1.5 - 0.75);
 
         particles.push({
@@ -610,11 +621,16 @@
         }
       });
 
-      if (closestNote && minDiff <= 0.12) {
+      // 判定処理（緩めた許容時間を使用）
+      if (closestNote && minDiff <= JUDGE_GOOD_SEC) {
         closestNote.hit = true;
-        if (minDiff <= 0.03) handleJudgement('PERFECT', 1000);
-        else if (minDiff <= 0.07) handleJudgement('GREAT', 700);
-        else handleJudgement('GOOD', 400);
+        if (minDiff <= JUDGE_PERFECT_SEC) {
+          handleJudgement('PERFECT', 1000);
+        } else if (minDiff <= JUDGE_GREAT_SEC) {
+          handleJudgement('GREAT', 700);
+        } else {
+          handleJudgement('GOOD', 400);
+        }
       }
     }
 
@@ -632,7 +648,7 @@
         text.className = 'text-2xl font-extrabold font-japanese text-red-400';
         score += points; combo++; greatCount++;
       } else if (type === 'GOOD') {
-        text.innerText = '良 (GOOD)';
+        text.innerText = '可 (GOOD)';
         text.className = 'text-xl font-bold font-japanese text-blue-400';
         score += points; combo++; goodCount++;
       } else {
@@ -683,16 +699,22 @@
       const overlay = document.getElementById('overlay');
       document.getElementById('overlayTitle').innerText = '演舞 終了！';
       
-      // 割合（%）計算
+      // 各判定の個数と割合（%）を算出
       const total = totalNotesCount || 1;
       const perfectPct = Math.round((perfectCount / total) * 100);
-      const greatPct = Math.round(((greatCount + goodCount) / total) * 100);
-      const missPct = Math.round((missCount / total) * 100);
+      const greatPct   = Math.round((greatCount / total) * 100);
+      const goodPct    = Math.round((goodCount / total) * 100);
+      const missPct    = Math.round((missCount / total) * 100);
 
-      // 太鼓上部の最前面に演奏結果を表示
+      // 太鼓上部の最前面に「天晴/見事/可/不可」すべてを表示
       document.getElementById('finalScoreText').innerText = `SCORE: ${score} / ${maxScore}`;
       document.getElementById('maxComboText').innerText = `MAX COMBO: ${maxCombo} / ${totalNotesCount}`;
-      document.getElementById('breakdownText').innerText = `天晴 ${perfectPct}% / 見事 ${greatPct}% / 不可 ${missPct}%`;
+      
+      document.getElementById('perfectDetail').innerText = `${perfectCount} (${perfectPct}%)`;
+      document.getElementById('greatDetail').innerText   = `${greatCount} (${greatPct}%)`;
+      document.getElementById('goodDetail').innerText    = `${goodCount} (${goodPct}%)`;
+      document.getElementById('missDetail').innerText    = `${missCount} (${missPct}%)`;
+
       document.getElementById('resultBox').classList.remove('hidden');
 
       document.getElementById('startBtn').innerText = 'もう一度挑戦';
