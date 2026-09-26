@@ -46,12 +46,6 @@
       color: rgba(255, 255, 255, 0.92);
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.6);
     }
-
-    /* 右下テキスト用の文字装飾 */
-    .shrine-title {
-      font-family: 'Yuji Syuku', serif;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.8), 0 0 4px rgba(245, 158, 11, 0.5);
-    }
   </style>
 </head>
 <body class="bg-festival text-white h-screen flex flex-col justify-start overflow-hidden p-2 pt-1 gap-1">
@@ -128,19 +122,9 @@
         </button>
       </div>
 
-      <!-- 右下ラベル表示 -->
-      <div class="absolute bottom-4 right-4 text-right pointer-events-none shrine-title">
-        <div class="text-base sm:text-lg font-bold text-amber-200 tracking-wider leading-snug">
-          大島八幡社
-        </div>
-        <div class="text-xs sm:text-sm text-amber-300/90 tracking-widest">
-          ～大島祭り保存会～
-        </div>
-      </div>
-
     </div>
 
-    <!-- 描画エリア -->
+    <!-- 描画エリア（太鼓エリアと同一の枠サイズに完全に調整） -->
     <div id="gameContainer" class="relative shrink-0 w-full max-h-[45vh] aspect-[16/9] bg-black rounded-2xl border-2 border-amber-700/60 shadow-xl overflow-hidden flex flex-col justify-center items-center box-border">
       <canvas id="gameCanvas" width="1280" height="720" class="w-full h-full block z-10 object-contain"></canvas>
 
@@ -598,21 +582,21 @@
 
     function spawnFireworkEffect(x, y) {
       const colors = ['#fbbf24', '#f59e0b', '#ef4444', '#fef08a', '#ffffff'];
-      const particleCount = 8;
+      const particleCount = 36;
 
       for (let i = 0; i < particleCount; i++) {
         const angle = (i / particleCount) * Math.PI * 2;
-        const speed = 6.0 + (Math.random() * 2.0);
+        const speed = 7.5 + (Math.random() * 1.5 - 0.75);
 
         particles.push({
           x: x,
           y: y,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          radius: Math.random() * 6 + 8,
+          radius: Math.random() * 3 + 2.5,
           color: colors[Math.floor(Math.random() * colors.length)],
           alpha: 1.0,
-          decay: 0.06
+          decay: 0.035
         });
       }
     }
@@ -659,6 +643,22 @@
           }
         }
       });
+
+      // --- バイブレーション処理 ---
+      if ('vibrate' in navigator) {
+        if (closestNote && minDiff <= MISS_CUTOFF_SEC) {
+          if (closestNote.type === 'don') {
+            // 「大」ノーツ（赤）: ドッシリ重い振動
+            navigator.vibrate(35);
+          } else {
+            // 「小」ノーツ（青）: 軽快な短い振動
+            navigator.vibrate(15);
+          }
+        } else {
+          // 空振り時: 手元へのフィードバック用微振動
+          navigator.vibrate(10);
+        }
+      }
 
       if (closestNote && minDiff <= MISS_CUTOFF_SEC) {
         closestNote.hit = true;
