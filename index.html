@@ -90,7 +90,7 @@
   <main class="relative w-full flex-1 flex flex-col overflow-hidden gap-1">
 
     <!-- スタート画面（タイトル・曲選択） -->
-    <div id="overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 text-center transition-opacity duration-300 ease-in-out bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(13,2,2,0.6), rgba(13,2,2,0.4), rgba(13,2,2,0.8)), url('大島八幡社.jpg');">
+    <div id="overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-start pt-6 p-4 text-center transition-opacity duration-300 ease-in-out bg-cover bg-center" style="background-image: linear-gradient(to bottom, rgba(13,2,2,0.6), rgba(13,2,2,0.4), rgba(13,2,2,0.8)), url('大島八幡社.jpg');">
       
       <!-- 曲選択 & 速度調整フォーム -->
       <div class="w-full max-w-xs bg-black/80 backdrop-blur-md p-4 rounded-2xl border border-amber-600/50 shadow-2xl space-y-3">
@@ -232,7 +232,7 @@
     let currentSongKey = null;
     let isPlaying = false;
     let isPaused = false;
-    let isGameEnded = false; // 曲終了重複防止フラグ
+    let isGameEnded = false;
     let speedMultiplier = 1.0;
     let isBlindMode = false;
     let score = 0;
@@ -764,7 +764,6 @@
         motivationBox.classList.add('hidden');
       }
 
-      // 判定結果モーダルを表示（タップ操作まで画面保持）
       document.getElementById('resultBox').classList.remove('hidden');
     }
 
